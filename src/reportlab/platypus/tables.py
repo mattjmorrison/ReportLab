@@ -202,7 +202,7 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
     for (x0,x1),v in spanCons.iteritems():
         if x0>=lim: continue
         x1 += 1
-        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1)])
+        t = sum([V[x] or 0+M.get(x,0) for x in xrange(x0,x1)])
         if t>=v-FUZZ: continue      #already good enough
         X = [x for x in xrange(x0,x1) if V0[x] is None] #variable candidates
         if not X: continue          #something wrong here mate
