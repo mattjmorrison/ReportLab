@@ -1,14 +1,17 @@
-#Copyright ReportLab Europe Ltd. 2000-2008
-#see license.txt for license details
-__doc__=''
-__version__=''' $Id: gfe.py 3269 2008-09-03 17:22:41Z rgbecker $ '''
+# Copyright ReportLab Europe Ltd. 2000-2008
+# see license.txt for license details
+__doc__ = ''
+__version__ = ''' $Id: gfe.py 3269 2008-09-03 17:22:41Z rgbecker $ '''
 
-#REPORTLAB_TEST_SCRIPT
+# REPORTLAB_TEST_SCRIPT
 import sys
-from reportlab.platypus import *
+from reportlab.platypus import (Spacer, SimpleDocTemplate, Paragraph, Preformatted,
+                                PageBreak)
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 from reportlab.rl_config import defaultPageSize
-PAGE_HEIGHT=defaultPageSize[1]
+
+PAGE_HEIGHT = defaultPageSize[1]
 
 styles = getSampleStyleSheet()
 
@@ -30,39 +33,43 @@ can add functionality to the engine such as alternative disk based
 indexed table implementations, dynamic interfaces to remote data
 bases or or other data sources, and user defined computations."""
 
-from reportlab.lib.units import inch
 
 pageinfo = "%s / %s / %s" % (Author, email, Title)
 
+
 def myFirstPage(canvas, doc):
     canvas.saveState()
-    #canvas.setStrokeColorRGB(1,0,0)
-    #canvas.setLineWidth(5)
-    #canvas.line(66,72,66,PAGE_HEIGHT-72)
-    canvas.setFont('Times-Bold',16)
+    # canvas.setStrokeColorRGB(1,0,0)
+    # canvas.setLineWidth(5)
+    # canvas.line(66,72,66,PAGE_HEIGHT-72)
+    canvas.setFont('Times-Bold', 16)
     canvas.drawString(108, PAGE_HEIGHT-108, Title)
-    canvas.setFont('Times-Roman',9)
+    canvas.setFont('Times-Roman', 9)
     canvas.drawString(inch, 0.75 * inch, "First Page / %s" % pageinfo)
     canvas.restoreState()
 
+
 def myLaterPages(canvas, doc):
-    #canvas.drawImage("snkanim.gif", 36, 36)
+    # canvas.drawImage("snkanim.gif", 36, 36)
     canvas.saveState()
-    #canvas.setStrokeColorRGB(1,0,0)
-    #canvas.setLineWidth(5)
-    #canvas.line(66,72,66,PAGE_HEIGHT-72)
-    canvas.setFont('Times-Roman',9)
+    # canvas.setStrokeColorRGB(1,0,0)
+    # canvas.setLineWidth(5)
+    # canvas.line(66,72,66,PAGE_HEIGHT-72)
+    canvas.setFont('Times-Roman', 9)
     canvas.drawString(inch, 0.75 * inch, "Page %d %s" % (doc.page, pageinfo))
     canvas.restoreState()
 
+
 def go():
-    Elements.insert(0,Spacer(0,inch))
+    Elements.insert(0, Spacer(0, inch))
     doc = SimpleDocTemplate('gfe.pdf')
-    doc.build(Elements,onFirstPage=myFirstPage, onLaterPages=myLaterPages)
+    doc.build(Elements, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
+
 
 Elements = []
 
-HeaderStyle = styles["Heading1"] # XXXX
+HeaderStyle = styles["Heading1"]  # XXXX
+
 
 def header(txt, style=HeaderStyle, klass=Paragraph, sep=0.3):
     s = Spacer(0.2*inch, sep*inch)
@@ -70,14 +77,18 @@ def header(txt, style=HeaderStyle, klass=Paragraph, sep=0.3):
     para = klass(txt, style)
     Elements.append(para)
 
+
 ParaStyle = styles["Normal"]
+
 
 def p(txt):
     return header(txt, style=ParaStyle, sep=0.1)
 
-#pre = p # XXX
+# pre = p # XXX
+
 
 PreStyle = styles["Code"]
+
 
 def pre(txt):
     s = Spacer(0.1*inch, 0.1*inch)
@@ -85,7 +96,8 @@ def pre(txt):
     p = Preformatted(txt, PreStyle)
     Elements.append(p)
 
-#header(Title, sep=0.1. style=ParaStyle)
+
+# header(Title, sep=0.1. style=ParaStyle)
 header(Author, sep=0.1, style=ParaStyle)
 header(URL, sep=0.1, style=ParaStyle)
 header(email, sep=0.1, style=ParaStyle)
@@ -272,8 +284,8 @@ and like at least two beers not served by lolas
 """)
 
 if 0:
-   go()
-   sys.exit(1)
+    go()
+    sys.exit(1)
 
 pre("""
     select f.drinker
@@ -348,8 +360,6 @@ a later release. This paper also does not intend to explain
 the complete operations of the internals; it is intended to provide
 at least enough information to understand the basic mechanisms
 for extending gadfly.""")
-
-
 
 
 p("""Some concepts and definitions provided next help with the description
@@ -447,7 +457,8 @@ pre("""
 p("""Illustrating that remapping using the [DRINKER&lt;=DRINKER,
 BAR&lt;=BAR] graph eliminates all attributes except DRINKER and
 BAR, such as BEER. More generally remap can be used in this way
-to implement the classical relational projection operation. (See [Korth and Silberschatz]
+to implement the classical relational projection operation.
+(See [Korth and Silberschatz]
 for a detailed discussion of the projection operator and other relational
 algebra operators such as selection, rename, difference and joins.)""")
 
@@ -846,7 +857,8 @@ that generally programmers should focus first on obtaining a working
 implementation (because as John Ousterhout is reported to have
 said "the biggest performance improvement is the transition
 from non-working to working") using the methodology that
-is most likely to obtain a working solution the quickest (Python). Only then if the performance
+is most likely to obtain a working solution the quickest (Python).
+Only then if the performance
 is inadequate should the programmer focus on optimizing
 the inner most loops, perhaps moving them to a very efficient
 implementation (C). Optimizing the outer loops will buy little
