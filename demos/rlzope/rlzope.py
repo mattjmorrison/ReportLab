@@ -12,19 +12,23 @@
 #
 #
 
-import string, cStringIO
+import string
+from io import StringIO
 try :
     from Shared.reportlab.platypus.paragraph import Paragraph
-    from Shared.reportlab.platypus.doctemplate import *
+    from Shared.reportlab.platypus.doctemplate import (PageTemplate, Frame,
+                                                       BaseDocTemplate, Spacer)
     from Shared.reportlab.lib.units import inch
     from Shared.reportlab.lib import styles
     from Shared.reportlab.lib.utils import ImageReader
 except ImportError :
     from reportlab.platypus.paragraph import Paragraph
-    from reportlab.platypus.doctemplate import *
+    from reportlab.platypus.doctemplate import (PageTemplate, Frame,
+                                                BaseDocTemplate, Spacer)
     from reportlab.lib.units import inch
     from reportlab.lib import styles
     from reportlab.lib.utils import ImageReader
+
 
 class MyPDFDoc :
     class MyPageTemplate(PageTemplate) :
@@ -36,7 +40,9 @@ class MyPDFDoc :
             self.parent = parent
 
             # Our doc is made of a single frame
-            content = Frame(0.75 * inch, 0.5 * inch, parent.document.pagesize[0] - 1.25 * inch, parent.document.pagesize[1] - (1.5 * inch))
+            content = Frame(0.75 * inch, 0.5 * inch,
+                            parent.document.pagesize[0] - 1.25 * inch,
+                            parent.document.pagesize[1] - (1.5 * inch))
             PageTemplate.__init__(self, "MyTemplate", [content])
 
             # get all the images we need now, in case we've got
@@ -55,7 +61,7 @@ class MyPDFDoc :
                 return None
 
             # Convert it to PIL
-            image = ImageReader(cStringIO.StringIO(str(logo.data)))
+            image = ImageReader(StringIO.StringIO(str(logo.data)))
             (width, height) = image.getSize()
 
             # scale it to be 0.75 inch high
@@ -73,7 +79,9 @@ class MyPDFDoc :
                 ((width, height), image) = self.logo
                 canvas.drawImage(image, inch, doc.pagesize[1] - inch, width, height)
             canvas.setFont('Times-Roman', 10)
-            canvas.drawCentredString(inch + (doc.pagesize[0] - (1.5 * inch)) / 2, 0.25 * inch, "Contributed by Jerome Alet - alet@librelogiciel.com")
+            canvas.drawCentredString(
+                inch + (doc.pagesize[0] - (1.5 * inch)) / 2, 0.25 * inch,
+                "Contributed by Jerome Alet - alet@librelogiciel.com")
             canvas.restoreState()
 
     def __init__(self, context, filename) :
@@ -84,7 +92,7 @@ class MyPDFDoc :
 
         # we will build an in-memory document
         # instead of creating an on-disk file.
-        self.report = cStringIO.StringIO()
+        self.report = StringIO.StringIO()
 
         # initialise a PDF document using ReportLab's platypus
         self.document = BaseDocTemplate(self.report)
@@ -97,21 +105,27 @@ class MyPDFDoc :
         self.StyleSheet = styles.getSampleStyleSheet()
 
         # then build a simple doc with ReportLab's platypus
-        sometext = "A sample script to show how to use ReportLab from within Zope"
+        # sometext = "A sample script to show how to use ReportLab from within Zope"
+        # sometext was assigned but not used.
         url = self.escapexml(context.absolute_url())
         urlfilename = self.escapexml(context.absolute_url() + '/%s' % filename)
-        self.append(Paragraph("Using ReportLab from within Zope", self.StyleSheet["Heading3"]))
+        self.append(Paragraph("Using ReportLab from within Zope",
+                              self.StyleSheet["Heading3"]))
         self.append(Spacer(0, 10))
-        self.append(Paragraph("You launched it from : %s" % url, self.StyleSheet['Normal']))
+        self.append(Paragraph("You launched it from : %s" % url,
+                              self.StyleSheet['Normal']))
         self.append(Spacer(0, 40))
-        self.append(Paragraph("If possible, this report will be automatically saved as : %s" % urlfilename, self.StyleSheet['Normal']))
+        self.append(Paragraph(
+            "If possible, this report will be automatically saved as : %s" %
+            urlfilename, self.StyleSheet['Normal']))
 
         # generation du document PDF
         self.document.build(self.objects)
         self.built = 1
 
     def __str__(self) :
-        """Returns the PDF document as a string of text, or None if it's not ready yet."""
+        """Returns the PDF document as a string of text,
+           or None if it's not ready yet."""
         if self.built :
             return self.report.getvalue()
         else :
@@ -127,6 +141,7 @@ class MyPDFDoc :
         s = string.replace(s, "&", "&amp;")
         s = string.replace(s, "<", "&lt;")
         return string.replace(s, ">", "&gt;")
+
 
 def rlzope(self) :
     """A sample external method to show people how to use ReportLab from within Zope."""
@@ -148,22 +163,28 @@ def rlzope(self) :
         # we will return it to the browser, but before that we also want to
         # save it into the ZODB into the current folder
         try :
-            self.manage_addFile(id = filename, file = content, title = "A sample PDF document produced with ReportLab", precondition = '', content_type = "application/pdf")
-        except :
+            self.manage_addFile(id=filename, file=content,
+                                title="A sample PDF document produced with ReportLab",
+                                precondition='', content_type="application/pdf")
+        except Exception:
             # it seems an object with this name already exists in the ZODB:
             # it's more secure to not replace it, since we could possibly
             # destroy an important PDF document of this name.
             pass
         self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-        self.REQUEST.RESPONSE.setHeader('Content-Disposition', 'attachment; filename=%s' % filename)
-    except:
-        import traceback, sys, cgi
-        content = sys.stdout = sys.stderr = cStringIO.StringIO()
+        self.REQUEST.RESPONSE.setHeader('Content-Disposition',
+                                        'attachment; filename=%s' % filename)
+    except Exception:
+        import traceback
+        import sys
+        import cgi
+        content = sys.stdout = sys.stderr = StringIO.StringIO()
         self.REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
         traceback.print_exc()
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
-        content = '<html><head></head><body><pre>%s</pre></body></html>' % cgi.escape(content.getvalue())
+        content = ('<html><head></head><body><pre>%s</pre></body></html>' %
+                   cgi.escape(content.getvalue()))
 
     # then we also return the PDF content to the browser
     return content
